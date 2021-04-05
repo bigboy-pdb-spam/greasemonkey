@@ -3,13 +3,14 @@
 // @description  Alters how products are displayed
 // @require      https://raw.githubusercontent.com/bigboy-pdb-spam/greasemonkey_scripts/master/config/GOG.conf.js
 // @version      1.0.0
-// @grant        none
+// @grant        GM.setClipboard
 // @match        https://www.gog.com/
 // @match        https://www.gog.com/*
 // ==/UserScript==
 
 // DEBUG
 console.log('Greasemonkey: UserScript: GOG Helper');
+
 
 
 //
@@ -90,27 +91,28 @@ if (typeof(perhaps_max) === 'undefined') {
 
 
 
-/*
-
-//
-// Code to extract product (game) information (MUST BE PASTED INTO THE CONSOLE)
-//
-
-
-function extractProductData() {
-  let products = document.querySelectorAll('[product-tile-id]');
-  for (const p of products) {
-    let product = {
-      id: p.attributes['product-tile-id'].value - 0,
-      price: p.attributes['track-add-to-cart-price'].value - 0,
-      title: p.attributes['track-add-to-cart-title'].value
-    };
-    
-    console.log(product.id + ', // ' + product.title);
+// Copy product id and title formatted as 'ID, // TITLE' to the clipboard when
+//  a product is hovered over with the mouse
+document.body.addEventListener('mousemove', (evt) => {
+  // The mouse is not hovering over the cart button on a product
+  if (!evt.target.matches('[class*="product-tile"]')) {
+    return; // ABORT
   }
-} extractProductData()
+  
+  let productTileElem = evt.target;
+  while (productTileElem && !productTileElem.matches('[product-tile-id]')) {
+    productTileElem = productTileElem.parentElement;
+  }
+  
+  let product = {
+    id: productTileElem.attributes['product-tile-id'].value - 0,
+    price: productTileElem.attributes['track-add-to-cart-price'].value - 0,
+    title: productTileElem.attributes['track-add-to-cart-title'].value
+  };
+  
+  GM.setClipboard(`${product.id}, // ${product.title}`);
+});
 
-*/
 
 
 //
