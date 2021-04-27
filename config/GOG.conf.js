@@ -10,13 +10,13 @@ let uninterested = [
 ];
 
 // Games that I might get
-let perhaps = [
-  ID_NUMBER, // GAME NAME
+let perhaps = {
+  ID_NUMBER: REASONABLE_PRICE, // GAME NAME
 
   ...
 
-  ID_NUMBER // GAME NAME
-];
+  ID_NUMBER: REASONABLE_PRICE // GAME NAME
+};
 
 // Styles for games based on their prices
 let price_ranges = [
@@ -44,8 +44,4 @@ let price_ranges = [
   }
 ];
 
-// The maximum price that I would buy a perhaps game at (up to that value and
-//  99 cents)
-let perhaps_max = 1; 
- 
 */

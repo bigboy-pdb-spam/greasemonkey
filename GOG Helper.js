@@ -2,7 +2,7 @@
 // @name         GOG Helper
 // @description  Alters how products are displayed
 // @require      https://raw.githubusercontent.com/bigboy-pdb-spam/greasemonkey_scripts/master/config/GOG.conf.js
-// @version      1.0.0
+// @version      1.1.0
 // @grant        GM.setClipboard
 // @match        https://www.gog.com/
 // @match        https://www.gog.com/*
@@ -10,7 +10,6 @@
 
 // DEBUG
 console.log('Greasemonkey: UserScript: GOG Helper');
-
 
 
 //
@@ -35,12 +34,15 @@ for (let i=0; i < uninterested.length; i++) {
 if (typeof(perhaps) === 'undefined') {
   throw new Error("'perhaps' variable was not defined");
   
-} else if (!Array.isArray(perhaps)) {
-  throw new Error("'perhaps' variable is not an array");
+} else if (typeof(perhaps) !== 'object') {
+  throw new Error("'perhaps' variable is not an object");
 }
 
-for (let i=0; i < perhaps.length; i++) {
-  if (typeof(perhaps[i]) !== 'number') {
+let numRegex = new RegExp('^[0-9]\+$');
+for (let id of Object.keys(perhaps)) {
+  if (!numRegex.exec(id)) {
+    throw new Error(`Key '${id}' in 'perhaps' is not a number`);
+  } else if (typeof(perhaps[id]) !== 'number') {
     throw new Error(`'perhaps[${i}]' is not a number`);
   }
 }
@@ -81,39 +83,6 @@ for (let i=0; i < price_ranges.length; i++) {
   }
 }
 
-// Validate 'perhaps_max' variable
-if (typeof(perhaps_max) === 'undefined') {
-  throw new Error("'perhaps_max' variable was not defined");
-  
-} else if (typeof(perhaps_max) !== 'number') {
-  throw new Error("'perhaps_max' variable is not a number");
-}
-
-
-
-// Copy product id and title formatted as 'ID, // TITLE' to the clipboard when
-//  a product is hovered over with the mouse
-document.body.addEventListener('mousemove', (evt) => {
-  // The mouse is not hovering over the cart button on a product
-  if (!evt.target.matches('[class*="product-tile"]')) {
-    return; // ABORT
-  }
-  
-  let productTileElem = evt.target;
-  while (productTileElem && !productTileElem.matches('[product-tile-id]')) {
-    productTileElem = productTileElem.parentElement;
-  }
-  
-  let product = {
-    id: productTileElem.attributes['product-tile-id'].value - 0,
-    price: productTileElem.attributes['track-add-to-cart-price'].value - 0,
-    title: productTileElem.attributes['track-add-to-cart-title'].value
-  };
-  
-  GM.setClipboard(`${product.id}, // ${product.title}`);
-});
-
-
 
 //
 // Generate CSS selectors for the maximum price allowed
@@ -144,49 +113,116 @@ for (const rnge of price_ranges) {
 
 
 //
-// Generate CSS selectors for games that I'm not interested in
+// Convert list of games that I'm NOT interested in into a set
 //
 
-
-let uninterested_selector = '';
+let uninterestedSet = new Set();
 
 for (const id of uninterested) {
-  // For store page
-  uninterested_selector += (uninterested_selector ? ', ' : '') +
-   `[product-tile-id="${id}"]`;
-}
-
-// By default include games that I might get later
-for (const id of perhaps) {
-  // For store page
-  uninterested_selector += (uninterested_selector ? ', ' : '') +
-   `[product-tile-id="${id}"]`;
+  uninterestedSet.add(id+'');
 }
 
 
 //
-// Generate CSS selectors for games that I might gat later (at a lower price)
+// Read product IDs and make appropriate chages to products
 //
 
+console.log(`Metal Slug X: ${perhaps['2046360890']}`);
+let lastIdRead = '';
 
-let perhaps_selector = '';
-let cheap_perhaps_selector = '';
+function readIds() {
+  let intervalId;
+  
+  intervalId = setInterval(function() {
+    console.log('Looking for: product IDs');
+    
+    let tiles = document.body.querySelectorAll('.product-tile');
+    
+    let allTilesLoaded = true;
+    for (let tile of tiles) {
+      let id = tile.getAttribute('product-tile-id');
+      let lastId = tile.getAttribute('data-last-id');
+      
+      allTilesLoaded = allTilesLoaded && id && id !== lastId;
+    }
+    
+    // The last product tile has NOT been read or it has NOT changed
+    if (!allTilesLoaded) {
+    //if (!lastId || lastId === lastIdRead) {
+    	return;
+    }
+    clearInterval(intervalId);
+    console.log('Found: product IDs');
+    
+    for (let tile of tiles) {
+      // Remove old classes from the product
+      tile.classList.remove('uninterested');
+      tile.classList.remove('later');
+      tile.classList.remove('reasonable');
+    
+      let id = tile.getAttribute('product-tile-id');
+      let price = Number(tile.getAttribute('track-add-to-cart-price'));
+      let reasonablePrice = Number(perhaps[id]);
 
-for (const id of perhaps) {
-    // For store page
-    perhaps_selector += (perhaps_selector ? ', ' : '') +
-     `[product-tile-id="${id}"]`;
+      tile.setAttribute('data-last-id', id);
+      
+      // I'm not interested in the product
+      if (uninterestedSet.has(id)) {
+        tile.classList.add('uninterested');
+        
+      // I might purchase the prduct for a reasonable price
+      } else if ((id in perhaps) && reasonablePrice) {
+        tile.classList.add('later');
+        
+        // Price is reasonable
+        if (price <= reasonablePrice) {
+          tile.classList.add('reasonable');
+        }
+      }
+    }
+    
+    console.log('Finished with: product IDs');
+  }, 1500);
 }
+readIds();
 
-// Make games that I might get later that are less than the maximum value that
-//  I am willing to spend visible
-for (const id of perhaps) {
-  for (let i = 0; i <= perhaps_max; i++) {
-    // For store page
-    cheap_perhaps_selector += (cheap_perhaps_selector ? ', ' : '') +
-     `[product-tile-id="${id}"][track-add-to-cart-price^="${i}."]`;
+
+//
+// Event listeners
+//
+
+// Copy product id and title formatted as 'ID // TITLE' to the clipboard when a product is hovered over with the mouse
+document.body.addEventListener('mousemove', (evt) => {
+  // The mouse is not hovering over the cart button on a product
+  if (!evt.target.matches('[class*="product-tile"]')) {
+    return; // ABORT
   }
-}
+  
+  let productTileElem = evt.target;
+  while (productTileElem && !productTileElem.matches('[product-tile-id]')) {
+    productTileElem = productTileElem.parentElement;
+  }
+  
+  let product = {
+    id: productTileElem.attributes['product-tile-id'].value - 0,
+    price: productTileElem.attributes['track-add-to-cart-price'].value - 0,
+    title: productTileElem.attributes['track-add-to-cart-title'].value
+  };
+  
+  GM.setClipboard(`${product.id}, // ${product.title}`);
+});
+
+
+// The document body was clicked on
+document.body.addEventListener('click', function(evt) {
+  // A page number was clicked on (the page was changed)
+  if (
+   evt.target.classList.contains('page-index-wrapper') &&
+   evt.target.classList.contains('page-indicator--inactive')
+  ) {
+    readIds();
+  }
+});
 
 
 //
@@ -196,12 +232,6 @@ for (const id of perhaps) {
 
 document.body.insertAdjacentHTML('beforeend',
  `<style>
-
- button.copy-id {
-   border: solid;
-   padding: 3px;
- }
-
  /* Change visibility of games based on prices */
 
  ${price_range_styles}
@@ -210,8 +240,8 @@ document.body.insertAdjacentHTML('beforeend',
  /* Change visibility of games that I might get later (and of those that are
   cheaper) */
 
- ${perhaps_selector} { background-color: purple; opacity: 0.2; }
- ${cheap_perhaps_selector} { opacity: 1; }
+ .later { background-color: purple; opacity: 0.2; }
+ .later.reasonable { opacity: 1; }
 
 
  /* Hide DLCs, extra content, demos, and games that I am uninterested in */
@@ -226,11 +256,8 @@ document.body.insertAdjacentHTML('beforeend',
  [track-add-to-cart-title~="demo" i],
  [track-add-to-cart-title~="teaser" i],
  [track-add-to-cart-title~="prologue" i],
-
- ${uninterested_selector}
- {
-   opacity: 0.1;
- }
  
+ .uninterested { opacity: 0.1; }
  </style>`
 );
+
