@@ -2,7 +2,7 @@
 // @name         GOG Helper
 // @description  Alters how products are displayed
 // @require      https://raw.githubusercontent.com/bigboy-pdb-spam/greasemonkey_scripts/master/config/GOG.conf.js
-// @version      1.1.0
+// @version      1.2.0
 // @grant        GM.setClipboard
 // @match        https://www.gog.com/
 // @match        https://www.gog.com/*
@@ -101,6 +101,8 @@ for (const rnge of price_ranges) {
   // A starting or ending range was NOT specified
   if (!hasRange(rnge)) {
     price_range_styles += `[track-add-to-cart-price] { ${rnge.style} } `;
+    
+    continue;
   }
   
   for (const num of range(rnge.start, rnge.end, 1)) {
@@ -127,7 +129,6 @@ for (const id of uninterested) {
 // Read product IDs and make appropriate chages to products
 //
 
-console.log(`Metal Slug X: ${perhaps['2046360890']}`);
 let lastIdRead = '';
 
 function readIds() {
@@ -136,19 +137,28 @@ function readIds() {
   intervalId = setInterval(function() {
     console.log('Looking for: product IDs');
     
-    let tiles = document.body.querySelectorAll('.product-tile');
-    
+    let tiles = document.body.querySelectorAll('.product-tile, .product-row');
+
+    // No tiles to load
+    if (tiles.length === 0) {
+      console.log('No products found');
+      clearInterval(intervalId);
+      
+      return; // DONE
+    }
+
     let allTilesLoaded = true;
     for (let tile of tiles) {
-      let id = tile.getAttribute('product-tile-id');
+      let id = tile.getAttribute('product-tile-id') ||
+        tile.getAttribute('gog-product');
+
       let lastId = tile.getAttribute('data-last-id');
-      
+
       allTilesLoaded = allTilesLoaded && id && id !== lastId;
     }
     
     // The last product tile has NOT been read or it has NOT changed
     if (!allTilesLoaded) {
-    //if (!lastId || lastId === lastIdRead) {
     	return;
     }
     clearInterval(intervalId);
@@ -160,7 +170,13 @@ function readIds() {
       tile.classList.remove('later');
       tile.classList.remove('reasonable');
     
-      let id = tile.getAttribute('product-tile-id');
+      let row_price = tile.querySelector('.product-row-price--new ._price');
+      if (row_price) {
+        tile.setAttribute('track-add-to-cart-price', row_price.innerHTML);
+      }
+      
+      let id = tile.getAttribute('product-tile-id') ||
+        tile.getAttribute('gog-product');
       let price = Number(tile.getAttribute('track-add-to-cart-price'));
       let reasonablePrice = Number(perhaps[id]);
 
@@ -193,21 +209,36 @@ readIds();
 
 // Copy product id and title formatted as 'ID // TITLE' to the clipboard when a product is hovered over with the mouse
 document.body.addEventListener('mousemove', (evt) => {
-  // The mouse is not hovering over the cart button on a product
-  if (!evt.target.matches('[class*="product-tile"]')) {
+  let product = {};
+  
+  // The mouse is hovering over a product square
+  if (evt.target.matches('[class*="product-tile"]')) {
+    let productTileElem = evt.target;
+    while (productTileElem && !productTileElem.matches('[product-tile-id]')) {
+      productTileElem = productTileElem.parentElement;
+    }
+
+    product = {
+      id: productTileElem.attributes['product-tile-id'].value - 0,
+      price: productTileElem.attributes['track-add-to-cart-price'].value - 0,
+      title: productTileElem.attributes['track-add-to-cart-title'].value
+    };
+  
+  // The mouse is hovering over a product row
+  } else if (evt.target.matches('[class*="product-row"]')) {
+    let productRowElem = evt.target;
+    while (productRowElem && !productRowElem.matches('[gog-product]')) {
+      productRowElem = productRowElem.parentElement;
+    }
+    
+    product = {
+      id: productRowElem.getAttribute('gog-product') - 0,
+      title: productRowElem.querySelector('span.product-title__text').innerHTML
+    };
+    
+  } else {
     return; // ABORT
   }
-  
-  let productTileElem = evt.target;
-  while (productTileElem && !productTileElem.matches('[product-tile-id]')) {
-    productTileElem = productTileElem.parentElement;
-  }
-  
-  let product = {
-    id: productTileElem.attributes['product-tile-id'].value - 0,
-    price: productTileElem.attributes['track-add-to-cart-price'].value - 0,
-    title: productTileElem.attributes['track-add-to-cart-title'].value
-  };
   
   GM.setClipboard(`${product.id}, // ${product.title}`);
 });
