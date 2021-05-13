@@ -2,7 +2,7 @@
 // @name         GOG Helper
 // @description  Alters how products are displayed
 // @require      https://raw.githubusercontent.com/bigboy-pdb-spam/greasemonkey_scripts/master/config/GOG.conf.js
-// @version      1.2.0
+// @version      1.3.0
 // @grant        GM.setClipboard
 // @match        https://www.gog.com/
 // @match        https://www.gog.com/*
@@ -126,6 +126,21 @@ for (const id of uninterested) {
 
 
 //
+// Regular expression matching words that imply that content isn't a game
+//  (ie. DLC, upgrades, soundtracks, and demos)
+//
+
+let uninterestedRegex = new RegExp(
+ '\\b('+
+  'dlc|expansion|upgrade|OST|soundtrack|'+
+  'demo|teaser|prologue|artbook|'+
+  'season pass|pack( [0-9]+)?'+
+  ')$',
+  'i'
+);
+
+
+//
 // Read product IDs and make appropriate chages to products
 //
 
@@ -177,6 +192,8 @@ function readIds() {
       
       let id = tile.getAttribute('product-tile-id') ||
         tile.getAttribute('gog-product');
+      let title = tile.getAttribute('track-add-to-cart-title') ||
+        tile.querySelector('span.product-title__text').innerHTML;
       let price = Number(tile.getAttribute('track-add-to-cart-price'));
       let reasonablePrice = Number(perhaps[id]);
 
@@ -185,6 +202,10 @@ function readIds() {
       // I'm not interested in the product
       if (uninterestedSet.has(id)) {
         tile.classList.add('uninterested');
+        
+      // It's likely that I'm not interested in the product
+      } else if (title.match(uninterestedRegex)) {
+        tile.classList.add('likely-uninterested');
         
       // I might purchase the prduct for a reasonable price
       } else if ((id in perhaps) && reasonablePrice) {
@@ -275,20 +296,11 @@ document.body.insertAdjacentHTML('beforeend',
  .later.reasonable { opacity: 1; }
 
 
- /* Hide DLCs, extra content, demos, and games that I am uninterested in */
-
- [track-add-to-cart-title~="dlc" i],
- [track-add-to-cart-title~="expansion" i],
- [track-add-to-cart-title~="upgrade" i],
-
- [track-add-to-cart-title~="OST" i],
- [track-add-to-cart-title~="soundtrack" i],
- 
- [track-add-to-cart-title~="demo" i],
- [track-add-to-cart-title~="teaser" i],
- [track-add-to-cart-title~="prologue" i],
- 
+ /* Hide content that I am uninterested in */
  .uninterested { opacity: 0.1; }
+
+ /* Hide content that I'm likely not interested in */
+ .likely-uninterested { opacity: 0.2; }
  </style>`
 );
 
