@@ -1,7 +1,7 @@
 /*
 
-Script requires users variable containing library numbers and their
- corresponding names and passwords to be declared as follows:
+Script requires getUsers function that returns object containing library
+ numbers and their corresponding names and passwords to be declared as follows:
 
 function getUsers() {
   return {
