@@ -11,7 +11,7 @@
   'use strict';
 
   // DEBUG
-  console.log('Greasemonkey: UserScript: Cloud Library Login User List');
+  console.log('Tampermonkey: UserScript: Cloud Library Login User List');
 
 
   let users;
