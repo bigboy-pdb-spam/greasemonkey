@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GOG Helper
 // @description  Alters how products are displayed
-// @require      https://raw.githubusercontent.com/bigboy-pdb-spam/greasemonkey_scripts/master/config/GOG.conf.js
+// @require      https://raw.githubusercontent.com/bigboy-pdb-spam/user_scripts/dd2671c079dabe62407723f652ac14c80cbbeccc/config/GOG.conf.js
 // @version      1.3.0
 // @grant        GM.setClipboard
 // @match        https://www.gog.com/

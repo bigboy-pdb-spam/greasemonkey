@@ -2,7 +2,7 @@
 // @name         Cloud Library Login User List
 // @description  Add drop down list of users to Cloud Library login pages
 // @version      1.0.0
-// @require      https://raw.githubusercontent.com/bigboy-pdb-spam/greasemonkey_scripts/master/config/Brampton_Library.conf.js
+// @require      https://raw.githubusercontent.com/bigboy-pdb-spam/user_scripts/dd2671c079dabe62407723f652ac14c80cbbeccc/config/Brampton_Library.conf.js
 // @grant        none
 // @match        https://ebook.yourcloudlibrary.com/library/brampton_library/*
 // ==/UserScript==

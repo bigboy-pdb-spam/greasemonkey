@@ -2,7 +2,7 @@
 // @name         Prodigy Login User List
 // @description  Add drop down list of users to Prodigy game login pages
 // @version      1.0.0
-// @require      https://raw.githubusercontent.com/bigboy-pdb-spam/greasemonkey_scripts/master/config/Prodigy.conf.js
+// @require      https://raw.githubusercontent.com/bigboy-pdb-spam/user_scripts/dd2671c079dabe62407723f652ac14c80cbbeccc/config/Prodigy.conf.js
 // @grant        none
 // @match        https://sso.prodigygame.com/game/login*
 // ==/UserScript==
