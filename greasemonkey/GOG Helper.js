@@ -212,7 +212,7 @@
         tile.classList.remove('later');
         tile.classList.remove('reasonable');
       
-        let row_price = tile.querySelector('.product-row-price--new ._price');
+        let row_price = tile.querySelector('._price');
         if (row_price) {
           tile.setAttribute('track-add-to-cart-price', row_price.innerHTML);
         }
