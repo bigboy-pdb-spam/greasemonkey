@@ -2,7 +2,7 @@
 // @name         GOG Helper
 // @description  Alters how products are displayed
 // @require      https://raw.githubusercontent.com/bigboy-pdb-spam/user_scripts/dd2671c079dabe62407723f652ac14c80cbbeccc/config/GOG.conf.js
-// @version      1.3.1
+// @version      1.3.2
 // @grant        GM.setClipboard
 // @match        https://www.gog.com/
 // @match        https://www.gog.com/*
@@ -212,7 +212,7 @@
         tile.classList.remove('later');
         tile.classList.remove('reasonable');
       
-        let row_price = tile.querySelector('.product-row-price--new ._price');
+        let row_price = tile.querySelector('.product-row-price--new ._price, .price-btn ._price');
         if (row_price) {
           tile.setAttribute('track-add-to-cart-price', row_price.innerHTML);
         }
