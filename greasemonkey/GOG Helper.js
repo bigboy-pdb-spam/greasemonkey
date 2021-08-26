@@ -2,7 +2,7 @@
 // @name         GOG Helper
 // @description  Alters how products are displayed
 // @require      https://raw.githubusercontent.com/bigboy-pdb-spam/user_scripts/dd2671c079dabe62407723f652ac14c80cbbeccc/config/GOG.conf.js
-// @version      1.3.2
+// @version      1.3.3
 // @grant        GM.setClipboard
 // @match        https://www.gog.com/
 // @match        https://www.gog.com/*
@@ -65,81 +65,6 @@
       throw new Error(`'perhaps[${i}]' is not a number`);
     }
   }
-
-  // Validate 'price_ranges' variable
-  function hasValidRange(o) {
-    return typeof(o.start) === 'number' && typeof (o.end) === 'number' &&
-     o.start <= o.end;
-  }
-
-  function hasRange(o) {
-    return typeof(o.start) !== 'undefined' && typeof(o.end) !== 'undefined';
-  }
-
-  let price_ranges;
-  try {
-    price_ranges = getPriceRanges();
-  } catch (e) {
-    if (e instanceof ReferenceError) {
-      throw new Error("'price_ranges' variable was not defined (check relevant @required script) ");
-    } else {
-      throw e;
-    }
-  }
-
-  if (!Array.isArray(price_ranges)) {
-    throw new Error("'price_ranges' variable is not an array");
-  }
-
-  for (let i=0; i < price_ranges.length; i++) {
-    if (typeof(price_ranges[i]) !== 'object') {
-      throw new Error(`'price_ranges[${i}]' is not an object`);
-      
-    } else if (typeof(price_ranges[i].style) !== 'string') {
-      throw new Error(`'price_ranges[${i}].style' must be a CSS style`);
-      
-    } else if (
-     i === 0 && hasRange(price_ranges[i]) && !hasValidRange(price_ranges[i])
-    ) {
-      throw new Error(
-       `'price_ranges[0]' must have either no range or a valid range`
-      );
-      
-    } else if (i > 0 && !hasValidRange(price_ranges[i])) {
-      throw new Error(`'price_ranges[${i}]' must have a valid range`);
-    }
-  }
-
-
-  //
-  // Generate CSS selectors for the maximum price allowed
-  //
-
-
-  const range = (start, stop, step) =>
-   Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
-
-
-  let price_range_styles = '';
-
-  for (const rnge of price_ranges) {
-    let price_selector = '';
-
-    // A starting or ending range was NOT specified
-    if (!hasRange(rnge)) {
-      price_range_styles += `[track-add-to-cart-price] { ${rnge.style} } `;
-      
-      continue;
-    }
-    
-    for (const num of range(rnge.start, rnge.end, 1)) {
-      price_selector += (price_selector ? ', ' : '') +
-       `[track-add-to-cart-price^="${num}."]`;
-    }
-    
-    price_range_styles += `${price_selector} { ${rnge.style} } `;
-  }
-
 
   //
   // Convert list of games that I'm NOT interested in into a set
@@ -311,22 +236,43 @@
 
   document.body.insertAdjacentHTML('beforeend',
    `<style>
+   .product-tile__title, .product-tile__prices,
+   .product-row__title, .product-row__price
+    { background-color: rgba(255,255,255,0.6);}
+
    /* Change visibility of games based on prices */
 
-   ${price_range_styles}
+   [track-add-to-cart-price], [track-add-to-cart-price] .product-tile__info { background-color: red; }
+   [track-add-to-cart-price] { opacity: 0.15 }
 
+   [track-add-to-cart-price^="0."], [track-add-to-cart-price^="0."] .product-tile__info,
+   [track-add-to-cart-price^="1."], [track-add-to-cart-price^="1."] .product-tile__info,
+   [track-add-to-cart-price^="2."], [track-add-to-cart-price^="2."] .product-tile__info,
+   [track-add-to-cart-price^="3."], [track-add-to-cart-price^="3."] .product-tile__info
+   { background-color: green; }
 
+   [track-add-to-cart-price^="4."], [track-add-to-cart-price^="4."] .product-tile__info,
+   [track-add-to-cart-price^="5."], [track-add-to-cart-price^="5."] .product-tile__info,
+   [track-add-to-cart-price^="6."], [track-add-to-cart-price^="6."] .product-tile__info,
+   [track-add-to-cart-price^="7."], [track-add-to-cart-price^="7."] .product-tile__info
+   { background-color: yellow; }
+
+   
    /* Change visibility of games that I might get later (and of those that are
     cheaper) */
 
-   .later { background-color: purple; opacity: 0.2; }
+   .later, .later .product-tile__info { background-color: purple; }
+   .later .product-tile__title, .later .product-tile__prices { background-color: rgba(255,255,255,1); }
+   .later { opacity: 0.3; }
    .later.reasonable { opacity: 1; }
 
 
-   /* Hide content that I am uninterested in */
-   .uninterested { opacity: 0.1; }
+   /* Content that I am uninterested in */
+   .uninterested, .uninterested .product-tile__info { background-color: black; }
+   .uninterested { opacity: 0.2; }
 
-   /* Hide content that I'm likely not interested in */
+   /* Content that I'm likely not interested in */
+   .likely-uninterested, .likely-uninterested .product-tile__info { background-color: purple; }
    .likely-uninterested { opacity: 0.2; }
    </style>`
   );

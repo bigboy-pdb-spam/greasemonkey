@@ -22,32 +22,4 @@ function getPerhaps() {
   };
 }
 
-// Return styles for games based on their prices
-function getPriceRanges() {
-  return [
-    // The default style
-    {
-      style: CSS_STYLE
-    },
-
-    // Style for price range
-    {
-      start: STARTING_PRICE_IN_WHOLE_DOLLARS,
-      end: ENDING_PRICE_IN_WHOLE_DOLLARS,
-      
-      style: CSS_STYLE
-    },
-
-    ...
-
-    // Style for price range
-    {
-      start: STARTING_PRICE_IN_WHOLE_DOLLARS,
-      end: ENDING_PRICE_IN_WHOLE_DOLLARS,
-      
-      style: CSS_STYLE
-    }
-  ];
-}
-
 */
