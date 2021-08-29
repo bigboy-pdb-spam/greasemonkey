@@ -2,7 +2,7 @@
 // @name         GOG Helper
 // @description  Alters how products are displayed
 // @require      https://raw.githubusercontent.com/bigboy-pdb-spam/user_scripts/dd2671c079dabe62407723f652ac14c80cbbeccc/config/GOG.conf.js
-// @version      1.3.3
+// @version      1.3.4
 // @grant        GM.setClipboard
 // @match        https://www.gog.com/
 // @match        https://www.gog.com/*
@@ -237,8 +237,9 @@
   document.body.insertAdjacentHTML('beforeend',
    `<style>
    .product-tile__title, .product-tile__prices,
-   .product-row__title, .product-row__price
-    { background-color: rgba(255,255,255,0.6);}
+   .product-row__title, .product-row__price,
+   .product-tile__price-discounted
+    { background-color: white; color: black; }
 
    /* Change visibility of games based on prices */
 
@@ -262,7 +263,6 @@
     cheaper) */
 
    .later, .later .product-tile__info { background-color: purple; }
-   .later .product-tile__title, .later .product-tile__prices { background-color: rgba(255,255,255,1); }
    .later { opacity: 0.3; }
    .later.reasonable { opacity: 1; }
 
