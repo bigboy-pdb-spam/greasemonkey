@@ -2,7 +2,7 @@
 // @name         GOG Helper
 // @description  Alters how products are displayed
 // @require      https://raw.githubusercontent.com/bigboy-pdb-spam/user_scripts/dd2671c079dabe62407723f652ac14c80cbbeccc/config/GOG.conf.js
-// @version      1.3.5
+// @version      1.3.6
 // @grant        GM.setClipboard
 // @match        https://www.gog.com/
 // @match        https://www.gog.com/*
@@ -155,10 +155,6 @@
         if (uninterestedSet.has(id)) {
           tile.classList.add('uninterested');
           
-        // It's likely that I'm not interested in the product
-        } else if (title.match(uninterestedRegex)) {
-          tile.classList.add('likely-uninterested');
-          
         // I might purchase the prduct for a reasonable price
         } else if ((id in perhaps) && reasonablePrice) {
           tile.classList.add('later');
@@ -167,6 +163,10 @@
           if (price <= reasonablePrice) {
             tile.classList.add('reasonable');
           }
+          
+        // It's likely that I'm not interested in the product
+        } else if (title.match(uninterestedRegex)) {
+          tile.classList.add('likely-uninterested');
         }
       }
       
