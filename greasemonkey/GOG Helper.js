@@ -2,7 +2,7 @@
 // @name         GOG Helper
 // @description  Alters how products are displayed
 // @require      https://raw.githubusercontent.com/bigboy-pdb-spam/user_scripts/dd2671c079dabe62407723f652ac14c80cbbeccc/config/GOG.conf.js
-// @version      1.3.6
+// @version      1.3.7
 // @grant        GM.setClipboard
 // @match        https://www.gog.com/
 // @match        https://www.gog.com/*
@@ -273,7 +273,7 @@
 
    /* Content that I'm likely not interested in */
    .likely-uninterested, .likely-uninterested .product-tile__info { background-color: blue; }
-   .likely-uninterested { opacity: 0.2; }
+   .likely-uninterested { opacity: 0.5; }
    </style>`
   );
 })();
