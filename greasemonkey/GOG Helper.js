@@ -2,7 +2,7 @@
 // @name         GOG Helper
 // @description  Alters how products are displayed
 // @require      https://raw.githubusercontent.com/bigboy-pdb-spam/user_scripts/dd2671c079dabe62407723f652ac14c80cbbeccc/config/GOG.conf.js
-// @version      1.3.7
+// @version      1.3.8
 // @grant        GM.setClipboard
 // @match        https://www.gog.com/
 // @match        https://www.gog.com/*
@@ -250,13 +250,13 @@
    [track-add-to-cart-price^="1."], [track-add-to-cart-price^="1."] .product-tile__info,
    [track-add-to-cart-price^="2."], [track-add-to-cart-price^="2."] .product-tile__info,
    [track-add-to-cart-price^="3."], [track-add-to-cart-price^="3."] .product-tile__info
-   { background-color: green; }
+   { background-color: green; opacity: 0.6 }
 
    [track-add-to-cart-price^="4."], [track-add-to-cart-price^="4."] .product-tile__info,
    [track-add-to-cart-price^="5."], [track-add-to-cart-price^="5."] .product-tile__info,
    [track-add-to-cart-price^="6."], [track-add-to-cart-price^="6."] .product-tile__info,
    [track-add-to-cart-price^="7."], [track-add-to-cart-price^="7."] .product-tile__info
-   { background-color: yellow; }
+   { background-color: yellow; opacity: 0.6 }
 
    
    /* Change visibility of games that I might get later (and of those that are
